@@ -28,13 +28,15 @@ module OpenAI
       CompletionsResponse.from_json(post(path: "/completions", parameters: parameters))
     end
 
-    # def completions(parameters : JSON::Any = {})
-    #  self.class.json_post(path: "/completions", parameters: parameters)
-    # end
-
-    # def edits(parameters : JSON::Any = {})
-    #  self.class.json_post(path: "/edits", parameters: parameters)
-    # end
+    def edits(model : String, input : String, instruction : String, options : Hash | Nil = nil)
+      parameters = {
+        "model"       => model,
+        "input"       => input,
+        "instruction" => instruction,
+      }
+      parameters = parameters.merge(options) if options
+      EditsResponse.from_json(post(path: "/edits", parameters: parameters))
+    end
 
     def embeddings(model : String, input : String, user : String | Nil = nil)
       parameters = {
@@ -61,16 +63,25 @@ module OpenAI
       @models ||= OpenAI::Models.new(self)
     end
 
-    # def moderations(parameters : JSON::Any = {})
-    #  self.class.json_post(path: "/moderations", parameters: parameters)
+    def moderations(input : String | Array(String), model : String = "text-moderation-latest")
+      parameters = {
+        "input" => input,
+        "model" => model,
+      }
+      ModerationsResponse.from_json(post(path: "/moderations", parameters: parameters))
+    end
+
+    # TODO: This is not working, multipart_post is not working
+    # def transcribe(file : String, model : String = "whisper-1", options : Hash | Nil = nil)
+    #  parameters = {
+    #    "file"  => file,
+    #    "model" => model,
+    #  }
+    #  parameters = parameters.merge(options) if options
+    #  TranscriptionsResponse.from_json(multipart_post(path: "/audio/transcriptions", parameters: parameters))
     # end
 
-    # def transcribe(parameters : JSON::Any = {})
-    #  self.class.multipart_post(path: "/audio/transcriptions", parameters: parameters)
-    # end
-
-    # def translate(parameters : JSON::Any = {})
-    #  self.class.multipart_post(path: "/audio/translations", parameters: parameters)
+    # def translate
     # end
 
     def get(path : String)
@@ -83,14 +94,16 @@ module OpenAI
       handle_response(response)
     end
 
-    # def self.multipart_post(path : String, parameters : Hash(String, String)?)
-    #  response = HTTP::Client.post(concat_path(path), headers: headers.merge({"Content-Type" => "multipart/form-data"}), form: parameters)
-    #  response.body.to_s
-    # end
+    # TODO: This is not working, need to look at https://crystal-lang.org/api/1.7.3/HTTP/FormData.html
+    def multipart_post(path : String, parameters : Hash)
+      headers["Content-Type"] = "multipart/form-data"
+      response = client.post("/v1" + path, headers: headers, form: parameters.to_json)
+      handle_response(response)
+    end
 
-    # def self.delete(path : String)
-    #  response = HTTP::Client.delete(concat_path(path), headers: headers)
-    #  response.body.to_s
+    # def delete(path : String)
+    #  response = client.delete("/v1" + path, headers: headers)
+    #  handle_response(response)
     # end
 
     private def client
@@ -98,10 +111,19 @@ module OpenAI
     end
 
     private def handle_response(response) : String
-      puts response.body.to_s
       if response.success?
         response.body.to_s
       else
+        # TODO: Parse the error message better
+        # Example:
+        # "{\n" +
+        # "  \"error\": {\n" +
+        # "    \"message\": \"1 validation error for Request\\nbody -> input\\n  field required (type=value_error.missing)\",\n" +
+        # "    \"type\": \"invalid_request_error\",\n" +
+        # "    \"param\": null,\n" +
+        # "    \"code\": null\n" +
+        # "  }\n" +
+        # "}"
         error = JSON.parse(response.body)
         raise ClientError.new(error["error"]["message"].to_s)
       end

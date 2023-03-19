@@ -20,11 +20,23 @@ module OpenAI
     include JSON::Serializable
   end
 
+  record EditsResponse, object : String, created : Int32, usage : CompletionUsage, choices : Array(NamedTuple(text: String, index: Int32)) do
+    include JSON::Serializable
+  end
+
   record Embedding, object : String, index : Int32, embedding : Array(Float64) do
     include JSON::Serializable
   end
 
   record EmbeddingsResponse, object : String, data : Array(Embedding), model : String, usage : Usage do
+    include JSON::Serializable
+  end
+
+  record ModerationsResponse, id : String, model : String, results : Array(NamedTuple(categories: Hash(String, Bool), category_scores: Hash(String, Float64), flagged: Bool)) do
+    include JSON::Serializable
+  end
+
+  record TranscriptionsResponse, text : String do
     include JSON::Serializable
   end
 end
