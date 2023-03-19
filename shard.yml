@@ -1,0 +1,9 @@
+name: openai
+version: 0.1.0
+
+authors:
+  - Lance Carlson <lancecarlson@gmail.com>
+
+crystal: 1.7.2
+
+license: MIT
