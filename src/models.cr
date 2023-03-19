@@ -5,9 +5,6 @@ module OpenAI
   record Model, id : String, object : String, created : Int32, owned_by : String, permission : Array(ModelPermission), root : String, parent : String | Nil do
     include JSON::Serializable
   end
-  record ModelResponse, object : String, data : Array(Model) do
-    include JSON::Serializable
-  end
 
   class Models
     def initialize(client : Client)
@@ -15,7 +12,7 @@ module OpenAI
     end
 
     def list
-      ModelResponse.from_json(@client.get(path: "/models"))
+      ListResponse.from_json(@client.get(path: "/models"))
     end
 
     def retrieve(id : String)

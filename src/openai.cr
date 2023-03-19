@@ -1,6 +1,7 @@
 require "http/client"
 require "json"
 
+require "./responses"
 require "./models"
 require "./client"
 

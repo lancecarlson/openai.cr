@@ -10,9 +10,23 @@ module OpenAI
       OpenAI.configuration.organization_id = organization_id if organization_id
     end
 
-    # def chat(parameters : JSON::Any = {})
-    #  self.class.json_post(path: "/chat/completions", parameters: parameters)
-    # end
+    def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash | Nil = nil)
+      parameters = {
+        "model"    => model,
+        "messages" => messages,
+      }
+      parameters = parameters.merge(options) if options
+      ChatResponse.from_json(post(path: "/chat/completions", parameters: parameters))
+    end
+
+    def completions(model : String, prompt : String, options : Hash | Nil = nil)
+      parameters = {
+        "model"  => model,
+        "prompt" => prompt,
+      }
+      parameters = parameters.merge(options) if options
+      CompletionsResponse.from_json(post(path: "/completions", parameters: parameters))
+    end
 
     # def completions(parameters : JSON::Any = {})
     #  self.class.json_post(path: "/completions", parameters: parameters)
@@ -22,9 +36,14 @@ module OpenAI
     #  self.class.json_post(path: "/edits", parameters: parameters)
     # end
 
-    # def embeddings(parameters : JSON::Any = {})
-    #  self.class.json_post(path: "/embeddings", parameters: parameters)
-    # end
+    def embeddings(model : String, input : String, user : String | Nil = nil)
+      parameters = {
+        "model" => model,
+        "input" => input,
+      }
+      parameters["user"] = user if user
+      EmbeddingsResponse.from_json(post("/embeddings", parameters))
+    end
 
     # def files
     #  @files ||= OpenAI::Files.new
@@ -59,10 +78,10 @@ module OpenAI
       handle_response(response)
     end
 
-    # def self.json_post(path : String, parameters : JSON::Any)
-    #  response = HTTP::Client.post(concat_path(path), headers: headers, body: parameters.to_json)
-    #  response.body.to_s
-    # end
+    def post(path : String, parameters : Hash)
+      response = client.post("/v1" + path, headers: headers, body: parameters.to_json)
+      handle_response(response)
+    end
 
     # def self.multipart_post(path : String, parameters : Hash(String, String)?)
     #  response = HTTP::Client.post(concat_path(path), headers: headers.merge({"Content-Type" => "multipart/form-data"}), form: parameters)
