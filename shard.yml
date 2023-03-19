@@ -6,4 +6,8 @@ authors:
 
 crystal: 1.7.2
 
+development_dependencies:
+  webmock:
+    github: manastech/webmock.cr
+
 license: MIT

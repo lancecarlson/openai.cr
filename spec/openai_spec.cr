@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe Openai do
+describe OpenAI do
   # TODO: Write tests
 
   it "works" do
