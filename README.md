@@ -1,5 +1,7 @@
 # OpenAI
 
+Client library for Open AI built in crystal lang
+
 ## Installation
 
 1. Add the dependency to your `shard.yml`:

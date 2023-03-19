@@ -4,6 +4,9 @@ version: 0.1.0
 authors:
   - Lance Carlson <lancecarlson@gmail.com>
 
+description: |
+  Client library for Open AI built in crystal lang
+
 crystal: 1.7.2
 
 development_dependencies:
