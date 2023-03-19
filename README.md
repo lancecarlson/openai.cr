@@ -1,6 +1,4 @@
-# openai
-
-TODO: Write a description here
+# OpenAI
 
 ## Installation
 
@@ -9,7 +7,7 @@ TODO: Write a description here
    ```yaml
    dependencies:
      openai:
-       github: your-github-user/openai
+       github: lancecarlson/openai.cr
    ```
 
 2. Run `shards install`
@@ -18,17 +16,53 @@ TODO: Write a description here
 
 ```crystal
 require "openai"
+
+openai = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
+
+# List and show models
+openai.models.list
+openai.models.retreive("davinci")
+
+# Creates a completion for the chat message
+openai.chat("gpt-3.5-turbo", [
+  {role: "user", content: "Hi!"},
+])
+
+# Creates a completion for the provided prompt and parameters
+openai.completions("text-davinci-003", "Hi!", {
+  temperature: 0.5
+})
+
+# Creates a new edit for the provided input, instruction, and parameters.
+openai.edits(
+  "text-davinci-edit-001",
+  "What day of the wek is it?",
+  "Fix the spelling mistakes"
+)
+
+# Creates an embedding vector representing the input text.
+openai.embeddings("babbage-similarity", "Hello world!")
+
+# Classifies if text violates OpenAI's Content Policy
+openai.moderations("I want to kill them.")
 ```
 
-TODO: Write usage instructions here
+Some endpoints are still under active development. I could use help if you want to send a PR for them!
+* Audio endponts (transcriptions and translations)
+* Files/Images/Fine Tunes
 
 ## Development
 
-TODO: Write development instructions here
+* The specs use webmock. You can comment them out to run a real request using your own Open AI API key. 
+I tried to make the requests use as few tokens as possible. If you plan on updating or adding an endpoint, 
+it's usually easiest if you copy the response from the Open AI API docs and stick it in the fixtures folder. 
+From there, build out a response struct inside of responses.cr and the rest should be fairly straight forward 
+with the client endpoints. If a resource has multiple endpoints like models or audio, it might be a good idea 
+to stick them in their own file for better organization.
 
 ## Contributing
 
-1. Fork it (<https://github.com/your-github-user/openai/fork>)
+1. Fork it (<https://github.com/lancecarlson/openai/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
@@ -36,4 +70,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [Lance Carlson](https://github.com/your-github-user) - creator and maintainer
+- [Lance Carlson](https://github.com/lancecarlson) - creator and maintainer
