@@ -13,9 +13,9 @@ describe OpenAI do
     end
 
     describe "retrieve" do
-      # WebMock.stub(:get, "https://api.openai.com/v1/models/davinci")
-      #  .with(headers: request_headers)
-      #  .to_return(body: File.read("spec/fixtures/model.json"))
+      WebMock.stub(:get, "https://api.openai.com/v1/models/davinci")
+        .with(headers: request_headers)
+        .to_return(body: File.read("spec/fixtures/model.json"))
 
       it "returns a model" do
         OpenAI::Client.new.models.retrieve("davinci")
