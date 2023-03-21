@@ -23,7 +23,7 @@ openai = OpenAI::Client.new(access_token: ENV.fetch("OPENAI_API_KEY"))
 
 # List and show models
 openai.models.list
-openai.models.retreive("davinci")
+openai.models.retrieve("davinci")
 
 # Creates a completion for the chat message
 openai.chat("gpt-3.5-turbo", [
@@ -55,11 +55,11 @@ Some endpoints are still under active development. I could use help if you want 
 
 ## Development
 
-The specs use webmock. You can comment them out to run a real request using your own Open AI API key. 
-I tried to make the requests use as few tokens as possible. If you plan on updating or adding an endpoint, 
-it's usually easiest if you copy the response from the Open AI API docs and stick it in the fixtures folder. 
-From there, build out a response struct inside of responses.cr and the rest should be fairly straight forward 
-with the client endpoints. If a resource has multiple endpoints like models or audio, it might be a good idea 
+The specs use webmock. You can comment them out to run a real request using your own Open AI API key.
+I tried to make the requests use as few tokens as possible. If you plan on updating or adding an endpoint,
+it's usually easiest if you copy the response from the Open AI API docs and stick it in the fixtures folder.
+From there, build out a response struct inside of responses.cr and the rest should be fairly straight forward
+with the client endpoints. If a resource has multiple endpoints like models or audio, it might be a good idea
 to stick them in their own file for better organization.
 
 At some point I want to get deeper into the error messages and handle these better as well.
