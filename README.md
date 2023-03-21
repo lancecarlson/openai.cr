@@ -43,7 +43,7 @@ openai.edits(
 )
 
 # Creates an embedding vector representing the input text.
-openai.embeddings("babbage-similarity", "Hello world!")
+openai.embeddings("text-embedding-ada-002", "Hello world!")
 
 # Classifies if text violates OpenAI's Content Policy
 openai.moderations("I want to kill them.")
