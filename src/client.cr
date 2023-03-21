@@ -10,7 +10,7 @@ module OpenAI
       OpenAI.configuration.organization_id = organization_id if organization_id
     end
 
-    def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash | Nil = nil)
+    def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash | NamedTuple | Nil = nil)
       parameters = {
         "model"    => model,
         "messages" => messages,
@@ -19,22 +19,22 @@ module OpenAI
       ChatResponse.from_json(post(path: "/chat/completions", parameters: parameters))
     end
 
-    def completions(model : String, prompt : String, options : Hash | Nil = nil)
+    def completions(model : String, prompt : String, options : Hash | NamedTuple | Nil = nil)
       parameters = {
         "model"  => model,
         "prompt" => prompt,
       }
-      parameters = parameters.merge(options) if options
+      parameters = parameters.merge(options.to_h) if options
       CompletionsResponse.from_json(post(path: "/completions", parameters: parameters))
     end
 
-    def edits(model : String, input : String, instruction : String, options : Hash | Nil = nil)
+    def edits(model : String, input : String, instruction : String, options : Hash | NamedTuple | Nil = nil)
       parameters = {
         "model"       => model,
         "input"       => input,
         "instruction" => instruction,
       }
-      parameters = parameters.merge(options) if options
+      parameters = parameters.merge(options.to_h) if options
       EditsResponse.from_json(post(path: "/edits", parameters: parameters))
     end
 
