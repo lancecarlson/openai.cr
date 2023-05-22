@@ -30,6 +30,12 @@ openai.chat("gpt-3.5-turbo", [
   {role: "user", content: "Hi!"},
 ])
 
+openai.chat("gpt-3.5-turbo", [
+  {role: "user", content: "Hi!"},
+], {"stream" => true}) do |chunk|
+  pp chunk.choices.first.delta
+end
+
 # Creates a completion for the provided prompt and parameters
 openai.completions("text-davinci-003", "Hi!", {
   temperature: 0.5
