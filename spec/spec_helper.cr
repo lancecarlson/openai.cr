@@ -1,6 +1,9 @@
 require "spec"
 require "webmock"
+require "dotenv"
 require "../src/openai"
+
+Dotenv.load
 
 WebMock.allow_net_connect = true
 

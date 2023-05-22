@@ -10,13 +10,27 @@ module OpenAI
       OpenAI.configuration.organization_id = organization_id if organization_id
     end
 
-    def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash | NamedTuple | Nil = nil)
+    def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash(String, (String | Bool)) | Nil = nil)
+      parameters = prepare_chat_parameters(model, messages, options)
+      path = "/chat/completions"
+
+      ChatResponse.from_json(post(path: path, parameters: parameters))
+    end
+
+    def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash, &block : CompletionChunk ->)
+      parameters = prepare_chat_parameters(model, messages, options)
+      path = "/chat/completions"
+
+      streaming_post(path: path, parameters: parameters, &block)
+    end
+
+    private def prepare_chat_parameters(model : String, messages : Array(NamedTuple(role: String, content: String)) | Array(Hash), options : Hash(String, (String | Bool)) | Hash | Nil = nil)
       parameters = {
         "model"    => model,
         "messages" => messages,
       }
       parameters = parameters.merge(options) if options
-      ChatResponse.from_json(post(path: "/chat/completions", parameters: parameters))
+      parameters
     end
 
     def completions(model : String, prompt : String, options : Hash | NamedTuple | Nil = nil)
@@ -106,6 +120,20 @@ module OpenAI
     #  handle_response(response)
     # end
 
+    private def streaming_post(path : String, parameters : Hash, &block : CompletionChunk ->)
+      headers["Accept"] = "text/event-stream"
+      headers["Cache-Control"] = "no-cache"
+      headers["Connection"] = "keep-alive"
+
+      stream_done = false
+
+      while !stream_done
+        response = client.post("/v1" + path, headers: headers, body: parameters.to_json)
+        stream_done = handle_stream_response(response, &block)
+        sleep 1 unless stream_done
+      end
+    end
+
     private def client
       @client ||= HTTP::Client.new(URI.parse(URI_BASE))
     end
@@ -127,6 +155,33 @@ module OpenAI
         error = JSON.parse(response.body)
         raise ClientError.new(error["error"]["message"].to_s)
       end
+    end
+
+    record Choice, delta : Hash(String, String), index : Int32, finish_reason : String | Nil do
+      include JSON::Serializable
+    end
+    record CompletionChunk, id : String, object : String, created : Int32, model : String, choices : Array(Choice) do
+      include JSON::Serializable
+    end
+
+    private def handle_stream_response(response, &block : CompletionChunk ->)
+      if response.success?
+        response.body.each_line do |line|
+          next if line == ""
+          payload = line.split(": ").last
+          return if payload == "[DONE]"
+
+          completion_chunk = CompletionChunk.from_json(payload)
+          yield completion_chunk
+
+          # If finish_reason is "stop", break the loop
+          if completion_chunk.choices.any? { |choice| choice.finish_reason == "stop" }
+            return true
+          end
+        end
+      end
+
+      false
     end
 
     private def headers

@@ -12,5 +12,8 @@ crystal: 1.7.2
 development_dependencies:
   webmock:
     github: manastech/webmock.cr
+  dotenv:
+    github: gdotdesign/cr-dotenv
+    version: ~> 1.0.0
 
 license: MIT

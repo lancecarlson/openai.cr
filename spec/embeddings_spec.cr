@@ -9,5 +9,11 @@ describe OpenAI do
     it "should create embeddings" do
       OpenAI::Client.new.embeddings("babbage-similarity", "Hello world!")
     end
+
+    # it "should raise an exception if we've hit the maximum context length" do
+    #  expect_raises(OpenAI::Error::InvalidRequestError) do
+    #    OpenAI::Client.new.embeddings("babbage-similarity", "aaaa" * 10001)
+    #  end
+    # end
   end
 end
