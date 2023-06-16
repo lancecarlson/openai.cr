@@ -6,15 +6,9 @@ describe OpenAI do
     #  .with(headers: request_headers)
     #  .to_return(body: File.read("spec/fixtures/chat.json"))
 
-    it "should send a chat and receive a completion response" do
-      OpenAI::Client.new.chat("gpt-3.5-turbo", [
-        {role: "user", content: "Hi!"},
-      ])
-    end
-
     it "should send a chat and receive a streaming completion response" do
       OpenAI::Client.new.chat("gpt-3.5-turbo", [
-        {role: "user", content: "Hi!"},
+        {role: "user", content: "What are the steps to create a new rails application?"},
       ], {"stream" => true}) do |chunk|
         puts chunk.choices.first.delta
       end

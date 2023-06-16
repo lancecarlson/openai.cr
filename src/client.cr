@@ -128,9 +128,10 @@ module OpenAI
       stream_done = false
 
       while !stream_done
-        response = client.post("/v1" + path, headers: headers, body: parameters.to_json)
-        stream_done = handle_stream_response(response, &block)
-        sleep 1 unless stream_done
+        client.post("/v1" + path, headers: headers, body: parameters.to_json) do |response|
+          stream_done = handle_stream_response(response, &block)
+          sleep 1 unless stream_done
+        end
       end
     end
 
@@ -166,7 +167,7 @@ module OpenAI
 
     private def handle_stream_response(response, &block : CompletionChunk ->)
       if response.success?
-        response.body.each_line do |line|
+        response.body_io.each_line do |line|
           next if line == ""
           payload = line.split(": ").last
           return if payload == "[DONE]"
