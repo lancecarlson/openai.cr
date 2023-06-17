@@ -148,7 +148,7 @@ module OpenAI
     end
 
     private def client
-      @client ||= HTTP::Client.new(URI.parse(URI_BASE))
+      HTTP::Client.new(URI.parse(URI_BASE))
     end
 
     private def handle_response(response) : String
