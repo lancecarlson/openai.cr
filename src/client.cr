@@ -5,9 +5,10 @@ module OpenAI
 
     URI_BASE = "https://api.openai.com/"
 
-    def initialize(access_token : String | Nil = nil, organization_id : String | Nil = nil)
+    def initialize(access_token : String | Nil = nil, organization_id : String | Nil = nil, logger : Log = Log.for("openai.client"))
       OpenAI.configuration.access_token = access_token if access_token
       OpenAI.configuration.organization_id = organization_id if organization_id
+      @logger = logger
     end
 
     def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash(String, (String | Bool)) | Nil = nil)
@@ -129,10 +130,21 @@ module OpenAI
 
       while !stream_done
         client.post("/v1" + path, headers: headers, body: parameters.to_json) do |response|
-          stream_done = handle_stream_response(response, &block)
-          sleep 1 unless stream_done
+          case response.status
+          when .ok?
+            stream_done = handle_stream_response(response, &block)
+            sleep 1 unless stream_done
+          else
+            error_message = "Error #{response.status_code}: #{response.body_io?.try(&.gets_to_end) || ""}"
+            @on_error.try &.call({status_code: response.status_code, message: error_message})
+            @logger.error { error_message }
+            break
+          end
         end
       end
+    end
+
+    def on_error(&@on_error : NamedTuple(status_code: Int32, message: String) ->) : Nil
     end
 
     private def client

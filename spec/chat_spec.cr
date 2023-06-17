@@ -1,5 +1,18 @@
 require "./spec_helper"
 
+# Custom log backend to store log entries in an array.
+class ArrayLogBackend < Log::IOBackend
+  getter logs : Array(String)
+
+  def initialize(@logs = [] of String)
+    super(String::Builder.new) # Using a String::Builder as a placeholder.
+  end
+
+  def write(entry : Log::Entry)
+    @logs << entry.to_s
+  end
+end
+
 describe OpenAI do
   describe "chat" do
     # WebMock.stub(:post, "https://api.openai.com/v1/chat/completions")
