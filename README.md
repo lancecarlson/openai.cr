@@ -32,6 +32,7 @@ openai.chat("gpt-3.5-turbo", [
   {role: "user", content: "Hi!"},
 ])
 
+# Streaming
 openai.chat("gpt-3.5-turbo", [
   {role: "user", content: "Hi!"},
 ], {"stream" => true}) do |chunk|
