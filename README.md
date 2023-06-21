@@ -1,6 +1,8 @@
 # OpenAI
 
-Client library for Open AI built in crystal lang
+Client library for Open AI built in crystal lang. 
+
+Note: This is a community maintained library.
 
 ## Installation
 
