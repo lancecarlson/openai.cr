@@ -11,11 +11,15 @@ module OpenAI
       @logger = logger
     end
 
-    def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash(String, (String | Bool)) | Nil = nil)
+    def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash | Nil = nil)
       parameters = prepare_chat_parameters(model, messages, options)
       path = "/chat/completions"
 
-      ChatResponse.from_json(post(path: path, parameters: parameters))
+      if parameters["functions"].empty?
+        ChatResponse.from_json(post(path: path, parameters: parameters))
+      else
+        ChatFunctionResponse.from_json(post(path: path, parameters: parameters))
+      end
     end
 
     def chat(model : String, messages : Array(NamedTuple(role: String, content: String)), options : Hash, &block : CompletionChunk ->)
@@ -25,7 +29,7 @@ module OpenAI
       streaming_post(path: path, parameters: parameters, &block)
     end
 
-    private def prepare_chat_parameters(model : String, messages : Array(NamedTuple(role: String, content: String)) | Array(Hash), options : Hash(String, (String | Bool)) | Hash | Nil = nil)
+    private def prepare_chat_parameters(model : String, messages : Array(NamedTuple(role: String, content: String)) | Array(Hash), options : Hash | Nil = nil)
       parameters = {
         "model"    => model,
         "messages" => messages,
@@ -170,19 +174,12 @@ module OpenAI
       end
     end
 
-    record Choice, delta : Hash(String, String), index : Int32, finish_reason : String | Nil do
-      include JSON::Serializable
-    end
-    record CompletionChunk, id : String, object : String, created : Int32, model : String, choices : Array(Choice) do
-      include JSON::Serializable
-    end
-
     private def handle_stream_response(response, &block : CompletionChunk ->)
       if response.success?
         response.body_io.each_line do |line|
           next if line == ""
           payload = line.split(": ").last
-          return if payload == "[DONE]"
+          return true if payload == "[DONE]"
 
           completion_chunk = CompletionChunk.from_json(payload)
           yield completion_chunk

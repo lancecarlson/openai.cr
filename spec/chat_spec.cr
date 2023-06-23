@@ -13,6 +13,13 @@ class ArrayLogBackend < Log::IOBackend
   end
 end
 
+class CatNameResponse
+  include JSON::Serializable
+
+  @[JSON::Field(description: "A name of a cat")]
+  getter cats : Array(String)
+end
+
 describe OpenAI do
   describe "chat" do
     # WebMock.stub(:post, "https://api.openai.com/v1/chat/completions")
@@ -25,6 +32,38 @@ describe OpenAI do
       ], {"stream" => true}) do |chunk|
         puts chunk.choices.first.delta
       end
+    end
+
+    it "should accept functions" do
+      list_cats = OpenAI.def_function("list_cats", "A list of cat names", CatNameResponse)
+
+      client = OpenAI::Client.new
+
+      response = client.chat("gpt-3.5-turbo-0613", [
+        {role: "user", content: "Give me a list of names for my cat."},
+      ], {"functions" => [list_cats]})
+
+      pp response
+      pp CatNameResponse.from_json(response.result(0))
+    end
+
+    it "should accept functions for the streaming API" do
+      list_cats = OpenAI.def_function("list_cats", "A list of cat names", CatNameResponse)
+
+      client = OpenAI::Client.new
+
+      output = ""
+      client.chat("gpt-3.5-turbo-0613", [
+        {role: "user", content: "Give me a list of 30 names for a cat."},
+      ], {"stream" => true, "functions" => [list_cats]}) do |chunk|
+        if function_call = chunk.choices.first.delta.function_call
+          output += function_call.arguments
+
+          pp function_call.arguments
+        end
+      end
+
+      pp CatNameResponse.from_json(output)
     end
   end
 end

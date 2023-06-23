@@ -12,7 +12,41 @@ module OpenAI
     include JSON::Serializable
   end
 
+  record FunctionCall, name : String | Nil, arguments : String do
+    include JSON::Serializable
+
+    def from_json(type)
+      type.from_json(arguments)
+    end
+  end
+
   record ChatResponse, id : String, object : String, created : Int32, model : String, usage : CompletionUsage, choices : Array(NamedTuple(message: NamedTuple(role: String, content: String), finish_reason: String, index: Int32)) do
+    include JSON::Serializable
+
+    def result(index : Int32)
+      message = choices[index][:message]
+      message[:content]
+    end
+  end
+
+  record ChatFunctionResponse, id : String, object : String, created : Int32, model : String, usage : CompletionUsage, choices : Array(NamedTuple(message: NamedTuple(role: String, content: String | Nil, function_call: FunctionCall), finish_reason: String, index: Int32)) do
+    include JSON::Serializable
+
+    def result(index : Int32)
+      message = choices[index][:message]
+      message[:function_call].arguments
+    end
+  end
+
+  record Delta, role : String | Nil, content : String | Nil, function_call : FunctionCall | Nil do
+    include JSON::Serializable
+  end
+
+  record Choice, delta : Delta, index : Int32, finish_reason : String | Nil do
+    include JSON::Serializable
+  end
+
+  record CompletionChunk, id : String, object : String, created : Int32, model : String, choices : Array(Choice) do
     include JSON::Serializable
   end
 

@@ -1,5 +1,5 @@
 name: openai
-version: 0.2.3
+version: 0.3.0
 
 authors:
   - Lance Carlson <lancecarlson@gmail.com>
@@ -8,6 +8,10 @@ description: |
   Client library for Open AI built in crystal lang
 
 crystal: 1.7.2
+
+dependencies:
+  json-schema:
+    github: spider-gazelle/json-schema
 
 development_dependencies:
   webmock:

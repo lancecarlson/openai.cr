@@ -1,5 +1,6 @@
 require "http/client"
 require "json"
+require "json-schema"
 
 require "./responses"
 require "./models"
@@ -37,5 +38,18 @@ module OpenAI
 
   def self.configure
     yield(configuration)
+  end
+
+  record FunctionRequest, name : String, description : String, parameters : JSON::Any do
+    include JSON::Serializable
+
+    def to_h
+      {name: @name, description: @description, parameters: @parameters}
+    end
+  end
+
+  def self.def_function(name, description, type)
+    parameters = JSON.parse(type.json_schema.to_json)
+    schema = FunctionRequest.new(name, description, parameters)
   end
 end
