@@ -1,6 +1,8 @@
 # OpenAI
 
-Client library for Open AI built in crystal lang
+Client library for Open AI built in crystal lang. 
+
+Note: This is a community maintained library.
 
 ## Installation
 
@@ -30,6 +32,7 @@ openai.chat("gpt-3.5-turbo", [
   {role: "user", content: "Hi!"},
 ])
 
+# Streaming
 openai.chat("gpt-3.5-turbo", [
   {role: "user", content: "Hi!"},
 ], {"stream" => true}) do |chunk|
