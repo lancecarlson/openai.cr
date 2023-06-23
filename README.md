@@ -33,6 +33,13 @@ openai.chat("gpt-3.5-turbo", [
 ])
 
 # Function support
+class CatNameResponse
+  include JSON::Serializable
+
+  @[JSON::Field(description: "A name of a cat")]
+  getter cats : Array(String)
+end
+
 list_cats = OpenAI.def_function("list_cats", "A list of cat names", CatNameResponse)
 
 client = OpenAI::Client.new
@@ -52,6 +59,13 @@ openai.chat("gpt-3.5-turbo", [
 end
 
 # Function Support
+class CatNameResponse
+  include JSON::Serializable
+
+  @[JSON::Field(description: "A name of a cat")]
+  getter cats : Array(String)
+end
+
 list_cats = OpenAI.def_function("list_cats", "A list of cat names", CatNameResponse)
 
 client = OpenAI::Client.new
