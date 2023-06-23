@@ -32,12 +32,42 @@ openai.chat("gpt-3.5-turbo", [
   {role: "user", content: "Hi!"},
 ])
 
+# Function support
+list_cats = OpenAI.def_function("list_cats", "A list of cat names", CatNameResponse)
+
+client = OpenAI::Client.new
+
+response = client.chat("gpt-3.5-turbo-0613", [
+  {role: "user", content: "Give me a list of names for my cat."},
+], {"functions" => [list_cats]})
+
+pp response
+pp CatNameResponse.from_json(response.result(0))
+
 # Streaming
 openai.chat("gpt-3.5-turbo", [
   {role: "user", content: "Hi!"},
 ], {"stream" => true}) do |chunk|
   pp chunk.choices.first.delta
 end
+
+# Function Support
+list_cats = OpenAI.def_function("list_cats", "A list of cat names", CatNameResponse)
+
+client = OpenAI::Client.new
+
+output = ""
+client.chat("gpt-3.5-turbo-0613", [
+  {role: "user", content: "Give me a list of 30 names for a cat."},
+], {"stream" => true, "functions" => [list_cats]}) do |chunk|
+  if function_call = chunk.choices.first.delta.function_call
+    output += function_call.arguments
+
+    pp function_call.arguments
+  end
+end
+
+pp CatNameResponse.from_json(output)
 
 # Creates a completion for the provided prompt and parameters
 openai.completions("text-davinci-003", "Hi!", {
