@@ -3,7 +3,7 @@ require "webmock"
 require "dotenv"
 require "../src/openai"
 
-Dotenv.load
+Dotenv.load if ENV["OPENAI_ACCESS_TOKEN"].nil?
 
 WebMock.allow_net_connect = true
 
