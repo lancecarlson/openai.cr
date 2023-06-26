@@ -65,5 +65,26 @@ describe OpenAI do
 
       pp CatNameResponse.from_json(output)
     end
+
+    it "should chat without functions" do
+      client = OpenAI::Client.new
+
+      response = client.chat("gpt-3.5-turbo", [{role: "user", content: "Give me a list of names for my cat."}])
+      
+      pp response
+    end
+
+    it "should chat with the streaming API without functions being provided" do
+      client = OpenAI::Client.new
+
+      output = ""
+      client.chat("gpt-3.5-turbo", [
+        {role: "user", content: "Give me 30 cat names as a comma separated list"},
+      ], {"stream" => true}) do |chunk| 
+        output += chunk.to_json.to_s
+      end
+
+      pp output
+    end
   end
 end
