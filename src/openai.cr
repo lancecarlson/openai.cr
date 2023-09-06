@@ -16,10 +16,12 @@ module OpenAI
     setter :access_token
     property :api_version
     property :organization_id
+    property :base_url
 
+    DEFAULT_BASE_URL = "https://api.openai.com"
     DEFAULT_API_VERSION = "v1"
 
-    def initialize(@access_token : String | Nil = nil, @api_version = DEFAULT_API_VERSION, @organization_id : String | Nil = nil)
+    def initialize(@access_token : String | Nil = nil, @api_version = DEFAULT_API_VERSION, @organization_id : String | Nil = nil, @base_url = DEFAULT_BASE_URL)
     end
 
     def access_token

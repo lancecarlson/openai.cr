@@ -3,11 +3,10 @@ module OpenAI
     class ClientError < Exception
     end
 
-    URI_BASE = "https://api.openai.com/"
-
-    def initialize(access_token : String | Nil = nil, organization_id : String | Nil = nil, logger : Log = Log.for("openai.client"))
+    def initialize(access_token : String | Nil = nil, organization_id : String | Nil = nil, logger : Log = Log.for("openai.client"), base_url : String | Nil = nil)
       OpenAI.configuration.access_token = access_token if access_token
       OpenAI.configuration.organization_id = organization_id if organization_id
+      OpenAI.configuration.base_url = base_url if base_url
       @logger = logger
     end
 
@@ -152,7 +151,7 @@ module OpenAI
     end
 
     private def client
-      HTTP::Client.new(URI.parse(URI_BASE))
+      HTTP::Client.new(URI.parse(OpenAI.configuration.base_url))
     end
 
     private def handle_response(response) : String
