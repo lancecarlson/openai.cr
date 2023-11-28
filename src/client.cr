@@ -15,7 +15,8 @@ module OpenAI
       parameters = prepare_chat_parameters(model, messages, options)
       path = "/chat/completions"
 
-      if parameters["functions"]?.nil? || parameters["functions"].empty?
+      parameters_function = parameters["functions"]?
+      if parameters_function.nil? || (parameters_function.is_a?(String) && parameters_function.empty?)
         ChatResponse.from_json(post(path: path, parameters: parameters))
       else
         ChatFunctionResponse.from_json(post(path: path, parameters: parameters))
